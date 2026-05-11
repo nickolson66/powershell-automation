@@ -28,10 +28,23 @@ Automates preparation for Oracle Smart View deployment by detecting installed ve
 
 ---
 
+### 🔹 Tessitura Client Upgrade Automation (`tessitura-client-upgrade.ps1`)
+Automates the deployment of updated Tessitura client folders during a server/application upgrade by backing up existing folders and copying updated files from a network share.
+
+**Key Features:**
+
+Tests connectivity to deployment network share before execution
+Renames existing application folders as backups
+Copies updated application files from centralized share
+Provides clear console output for troubleshooting
+Designed for enterprise software upgrade workflows
+
+---
+
 ## Skills Demonstrated
 - PowerShell scripting and automation
 - Windows system administration
-- Software deployment and remediation
+- Software deployment, remediation, and upgrade automation
 - Networking configuration and controls
 - Log analysis and troubleshooting
 - Process automation in managed environments
@@ -44,6 +57,7 @@ These scripts are designed for:
 - Enterprise IT environments
 - Automated deployments and system remediation
 - Standardizing configurations across multiple endpoints
+- Enterprise application migrations and upgrade support
 
 ---
 
