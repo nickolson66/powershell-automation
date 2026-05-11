@@ -17,32 +17,43 @@
 # NOTE: Run cleanup script separately after confirming app works
 # =============================================================
 
+# --- LOG FUNCTION ---
+$logFile = "C:\Tessitura\update_log.txt"
+
+function Write-Log {
+    param([string]$message)
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $entry = "[$timestamp] $message"
+    Write-Host $entry
+    Add-Content -Path $logFile -Value $entry
+}
+
 # --- PRE-CHECK: Has this script already run successfully? ---
 $flagFile = "C:\Tessitura\update_complete.flag"
 
-Write-Host "Pre-Check: Checking if script has already run successfully..."
+Write-Log "Pre-Check: Checking if script has already run successfully..."
 
 if (Test-Path $flagFile) {
-    Write-Host "Update already completed successfully on this machine. Exiting."
+    Write-Log "Update already completed successfully on this machine. Exiting."
     exit 0
 }
 
-Write-Host "No flag file found, proceeding with update..."
+Write-Log "No flag file found, proceeding with update..."
 
 # --- STEP 1: Test Network Share Connection ---
 $sourcePath = "\\tessdocs.rpac.org\Tessitura"
 
-Write-Host "Step 1: Testing connection to network share..."
+Write-Log "Step 1: Testing connection to network share..."
 
 if (-not (Test-Path $sourcePath)) {
-    Write-Host "Cannot reach network share: $sourcePath - Stopping script."
+    Write-Log "Cannot reach network share: $sourcePath - Stopping script."
     exit 1
 }
 
-Write-Host "Network share accessible, proceeding..."
+Write-Log "Network share accessible, proceeding..."
 
 # --- STEP 2: Rename Existing Folders to _old ---
-Write-Host "Step 2: Renaming existing folders to _old..."
+Write-Log "Step 2: Renaming existing folders to _old..."
 
 $folders = @(
     "C:\Tessitura\v16",
@@ -53,14 +64,14 @@ foreach ($folder in $folders) {
     if (Test-Path $folder) {
         $newName = "$folder`_old"
         Rename-Item -Path $folder -NewName $newName -Force
-        Write-Host "Renamed: $folder -> $newName"
+        Write-Log "Renamed: $folder -> $newName"
     } else {
-        Write-Host "Not found, skipping: $folder"
+        Write-Log "Not found, skipping: $folder"
     }
 }
 
 # --- STEP 3: Create Empty Destination Folders ---
-Write-Host "Step 3: Creating empty destination folders..."
+Write-Log "Step 3: Creating empty destination folders..."
 
 $destinations = @(
     "C:\Tessitura\v16",
@@ -69,11 +80,11 @@ $destinations = @(
 
 foreach ($destination in $destinations) {
     New-Item -Path $destination -ItemType Directory -Force
-    Write-Host "Created: $destination"
+    Write-Log "Created: $destination"
 }
 
 # --- STEP 4: Copy New Folders from Network Share ---
-Write-Host "Step 4: Copying new folders from network share..."
+Write-Log "Step 4: Copying new folders from network share..."
 
 $transfers = @(
     @{ Source = "$sourcePath\v16";    Destination = "C:\Tessitura\v16" },
@@ -83,16 +94,16 @@ $transfers = @(
 foreach ($transfer in $transfers) {
     if (Test-Path $transfer.Source) {
         Copy-Item -Path $transfer.Source\* -Destination $transfer.Destination -Recurse -Force
-        Write-Host "Copied: $($transfer.Source) -> $($transfer.Destination)"
+        Write-Log "Copied: $($transfer.Source) -> $($transfer.Destination)"
     } else {
-        Write-Host "Source not found, skipping: $($transfer.Source)"
+        Write-Log "Source not found, skipping: $($transfer.Source)"
     }
 }
 
 # --- STEP 5: Create Flag File ---
-Write-Host "Step 5: Creating flag file..."
+Write-Log "Step 5: Creating flag file..."
 
 New-Item -Path $flagFile -ItemType File -Force
-Write-Host "Flag file created at $flagFile. Script will not run again on this machine."
+Write-Log "Flag file created at $flagFile. Script will not run again on this machine."
 
-Write-Host "Script complete. Please verify the app is working before running the cleanup script."
+Write-Log "Script complete. Please verify the app is working before running the cleanup script."
